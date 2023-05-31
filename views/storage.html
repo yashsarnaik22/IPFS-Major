@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .main-content {
+            text-align: center;
+            margin-top: 100px;
+        }
+
+        .heading {
+            margin-bottom: 50px;
+        }
+
+        .image-drop {
+            margin-bottom: 20px;
+        }
+
+        .submit-btn {
+            padding: 10px 20px;
+            background-color: #00b712;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+
+        #public-url {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <center>
+        <div class="main-content">
+            <div class="heading">
+                <h1>Store your files to IPFS and make them secure now!</h1>
+            </div>
+
+            <div>
+                <h3>Upload your image here....</h3>
+                <input class="image-drop" type="file" name="imgfile" accept="image/*" id="imgfile">
+                <br/><br/>
+                <button class="submit-btn" id="submitBtn">Submit</button>
+                <a href="" target="_blank" id="publicUrl">
+                    <p>The public hash to your image will be visible here!</p>
+                </a>
+            </div>
+            <br/><br/><br/>
+        </div>
+    </center>
+
+    <script>
+        const inputFile = document.getElementById('imgfile');
+        const submitButton = document.getElementById('submitBtn');
+        const publicUrl = document.getElementById('publicUrl');
+
+        submitButton.addEventListener('click', async () => {
+            const file = inputFile.files[0];
+            const reader = new FileReader();
+
+            reader.onloadend = async () => {
+                const buffer = Buffer.from(reader.result);
+                const ipfs = window.IpfsHttpClient('ipfs.infura.io', '5001', { protocol: 'https' });
+
+                try {
+                    const response = await ipfs.add(buffer);
+                    const ipfsHash = response[0].hash;
+                    publicUrl.href = `https://ipfs.io/ipfs/${ipfsHash}`;
+                    publicUrl.textContent = `The public hash to your image: ${ipfsHash}`;
+                } catch (error) {
+                    console.error(error);
+                    alert('An error occurred while uploading the image. Please try again.');
+                }
+            };
+
+            if (file) {
+                reader.readAsArrayBuffer(file);
+            }
+        });
+    </script>
+</body>
+</html>
